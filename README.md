@@ -7,6 +7,7 @@ A RESTful API built with Node.js, Express, and MySQL that provides user authenti
 - **User Registration & Login** with JWT authentication
 - **Protected CRUD operations** for user management
 - **Products API** with pagination and image upload for authorized users
+- **Advanced Product Search** with full-text search, filtering, and sorting
 - **Dual MySQL databases** (users + products) with connection pooling
 - **Google Cloud Storage** integration with local storage fallback
 - **Image upload** with secure file handling and validation
@@ -18,6 +19,7 @@ A RESTful API built with Node.js, Express, and MySQL that provides user authenti
 - **Input validation** on all endpoints
 - **Comprehensive error handling** with try-catch blocks
 - **Production-ready** with secure error responses
+- **Search optimization** with MySQL full-text indexes and composite indexes
 
 ## Project Structure
 
@@ -25,31 +27,44 @@ A RESTful API built with Node.js, Express, and MySQL that provides user authenti
 node_mysql_crud/
 ├── config/
 │   ├── db.js              # MySQL connection pools (users + products)
+│   ├── environments.js    # Environment configuration loader
 │   ├── storageService.js  # Google Cloud Storage service
 │   └── demo-google-cloud-key.json # Demo GCS credentials
 ├── controllers/
 │   ├── authController.js  # Authentication logic
 │   ├── userController.js  # User CRUD operations
-│   └── productController.js # Product operations with pagination
+│   ├── productController.js # Product operations with pagination
+│   └── searchController.js # Product search operations
 ├── middleware/
 │   ├── auth.js           # JWT token verification
 │   ├── validation.js     # Input validation middleware
+│   ├── searchValidation.js # Search input validation
 │   ├── upload.js         # File upload middleware
 │   └── errorHandler.js   # Global error handling
 ├── models/
 │   ├── userModel.js      # User database queries
-│   └── productModel.js   # Product database queries
+│   ├── productModel.js   # Product database queries
+│   └── searchModel.js    # Search database queries
 ├── routes/
 │   ├── authRoutes.js     # Auth endpoints
 │   ├── userRoutes.js     # Protected user endpoints
-│   └── productRoutes.js  # Protected product endpoints
+│   ├── productRoutes.js  # Protected product endpoints
+│   └── searchRoutes.js   # Search endpoints
+├── .env                  # Environment variables (create from .env.example)
 ├── .env.dev              # Development environment
 ├── .env.stg              # Staging environment
+├── .env.example          # Environment template
+├── .gitignore            # Git ignore rules
 ├── app.js               # Express app setup
 ├── server.js            # Server entry point
 ├── database_setup.sql   # Database schema + sample data
+├── database_search_setup.sql # Search optimization setup
 ├── generate-jwt-secret.js # JWT secret generator utility
-└── package.json
+├── LICENSE              # MIT License
+├── package.json         # Dependencies and scripts
+├── POSTMAN_COLLECTION.md # Postman API collection
+├── POSTMAN_SEARCH_EXAMPLES.md # Search API examples
+└── PROJECT_STORY.md     # Project development story
 ```
 
 ## Setup Instructions
@@ -178,6 +193,21 @@ CREATE TABLE products (
 );
 ```
 
+#### Database Setup Files:
+```bash
+# Run the main database setup (creates tables + sample data)
+mysql -u root -p < database_setup.sql
+
+# Run search optimization setup (adds indexes for better search performance)
+mysql -u root -p < database_search_setup.sql
+```
+
+**Search Optimization Features:**
+- Full-text search indexes on name and description
+- Individual indexes on category, price, and timestamps
+- Composite indexes for common query patterns
+- Additional sample data for testing search functionality
+
 ### 4. Start Server
 
 #### Single Environment:
@@ -218,6 +248,10 @@ npm run staging
 |--------|----------|-------------|
 | GET | `/products?page=1&limit=10` | Get paginated products list |
 | POST | `/createProducts` | Create product with image upload |
+
+### Search (Protected)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET | `/search?q=samsung&category=electronics` | Search products with filters |
 | GET | `/search/categories` | Get available product categories |
 
